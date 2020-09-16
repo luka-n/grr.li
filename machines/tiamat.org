@@ -10,12 +10,14 @@
   in
   {
     imports = [
+      <nixos-unstable/nixos/modules/services/misc/lidarr.nix>
       <nixos-unstable/nixos/modules/services/misc/radarr.nix>
       <nixos-unstable/nixos/modules/services/misc/sonarr.nix>
       <nixos-unstable/nixos/modules/services/torrent/transmission.nix>
     ];
 
     disabledModules = [
+      "services/misc/lidarr.nix"
       "services/misc/radarr.nix"
       "services/misc/sonarr.nix"
       "services/torrent/transmission.nix"
@@ -23,6 +25,7 @@
 
     nixpkgs.config = baseconfig // {
       packageOverrides = pkgs: {
+        lidarr = unstable.pkgsi686Linux.lidarr;
         radarr = unstable.pkgsi686Linux.radarr;
         sonarr = unstable.pkgsi686Linux.sonarr;
         transmission = unstable.pkgsi686Linux.transmission;
@@ -53,6 +56,7 @@
   services.dnsmasq = {
     enable = true;
     extraConfig = ''
+      address=/lidarr/10.8.0.1
       address=/radarr/10.8.0.1
       address=/sonarr/10.8.0.1
       address=/tiamat/10.8.0.1
@@ -61,10 +65,20 @@
     '';
   };
 #+END_SRC
+**** Lidarr
+#+BEGIN_SRC nix
+    services.lidarr.enable = true;
+    users.extraUsers.lidarr.extraGroups = [ "transmission" ];
+#+END_SRC
 **** NFS
 #+BEGIN_SRC nix
   fileSystems."/export/movies" = {
     device = "/var/lib/radarr/.config/Radarr/Downloads";
+    options = [ "bind" ];
+  };
+
+  fileSystems."/export/music" = {
+    device = "/var/lib/lidarr/.config/Lidarr/Downloads";
     options = [ "bind" ];
   };
 
@@ -83,6 +97,7 @@
   services.nfs.server.exports = ''
     /export          10.0.0.0/24(ro,fsid=0,nohide,insecure,no_subtree_check)
     /export/movies   10.0.0.0/24(ro,fsid=4,nohide,insecure,no_subtree_check)
+    /export/music    10.0.0.0/24(ro,fsid=6,nohide,insecure,no_subtree_check)
     /export/torrents 10.0.0.0/24(ro,fsid=1,nohide,insecure,no_subtree_check)
     /export/tv       10.0.0.0/24(ro,fsid=5,nohide,insecure,no_subtree_check)
   '';
@@ -91,6 +106,11 @@
 #+BEGIN_SRC nix
   services.nginx = {
     enable = true;
+    virtualHosts."lidarr" =  {
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:8686";
+      };
+    };
     virtualHosts."radarr" =  {
       locations."/" = {
         proxyPass = "http://127.0.0.1:7878";
