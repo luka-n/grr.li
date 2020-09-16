@@ -1,0 +1,146 @@
+#+PROPERTY: header-args :tangle yes
+* hekate
+** Preamble
+#+BEGIN_SRC nix
+  { hekate = { config, pkgs, ... }:
+  let
+    baseconfig = { allowUnfree = true; };
+    unstable = import <nixos-unstable> { config = baseconfig; };
+  in
+  {
+    imports = [
+      <nixos-unstable/nixos/modules/services/misc/jackett.nix>
+      ../home-manager/nixos
+    ];
+
+    disabledModules = [
+      "services/misc/jackett.nix"
+    ];
+
+    nixpkgs.config = baseconfig // {
+      packageOverrides = pkgs: {
+        jackett = unstable.jackett;
+      };
+    };
+#+END_SRC
+** Configuration
+*** GNOME
+#+BEGIN_SRC nix
+  services.xserver.enable = true;
+  services.xserver.displayManager.gdm.enable = true;
+  services.xserver.desktopManager.gnome3.enable = true;
+#+END_SRC
+*** GnuPG
+#+BEGIN_SRC nix
+  programs.gnupg.agent = {
+    enable = true;
+    enableSSHSupport = true;
+    pinentryFlavor = "gnome3";
+  };
+#+END_SRC
+*** Home
+**** Preamble
+#+BEGIN_SRC nix
+  home-manager.users.me = {
+#+END_SRC
+**** Packages
+#+BEGIN_SRC nix
+  home.packages = with pkgs; [
+    adapta-gtk-theme
+    discord
+    dnsutils
+    easyrsa
+    emacs
+    feedreader
+    file
+    firefox
+    fzf
+    git
+    git-secret
+    gnome3.geary
+    gnome3.gnome-tweak-tool
+    gnomeExtensions.caffeine
+    gnomeExtensions.dash-to-dock
+    htop
+    irssi
+    mc
+    ncdu
+    networkmanagerapplet
+    nfs-utils
+    nixops
+    nmap
+    openssl
+    paper-icon-theme
+    silver-searcher
+    steam
+    tdesktop
+    tilix
+    transmission-remote-gtk
+    unzip
+    vim
+    wget
+  ];
+#+END_SRC
+**** Services
+***** Parcellite
+#+BEGIN_SRC nix
+  services.parcellite.enable = true;
+#+END_SRC
+***** Redshift
+#+BEGIN_SRC nix
+  services.redshift = {
+    enable = true;
+    latitude = "46.01";
+    longitude = "15.30";
+    temperature = {
+      day = 5500;
+      night = 4700;
+    };
+  };
+#+END_SRC
+**** Epilogue
+#+BEGIN_SRC nix
+  };
+#+END_SRC
+*** Networking
+#+BEGIN_SRC nix
+  networking.useDHCP = false;
+  networking.interfaces.wlp4s0.useDHCP = true;
+#+END_SRC
+**** Firewall
+#+BEGIN_SRC nix
+  networking.firewall.allowedTCPPorts = [
+    9117                          # jackett
+  ];
+#+END_SRC
+**** Hostname
+#+BEGIN_SRC nix
+  networking.hostName = "hekate";
+#+END_SRC
+*** Services
+**** Jackett
+#+BEGIN_SRC nix
+  services.jackett.enable = true;
+#+END_SRC
+**** OpenSSH
+#+BEGIN_SRC nix
+  services.openssh.enable = true;
+#+END_SRC
+*** Steam Support
+#+BEGIN_SRC nix
+  hardware.opengl.driSupport32Bit = true;
+  hardware.pulseaudio.support32Bit = true;
+#+END_SRC
+*** User
+#+BEGIN_SRC nix
+  users.users.me = {
+    isNormalUser = true;
+    extraGroups = [ "wheel" ];
+  };
+#+END_SRC
+** Epilogue
+#+BEGIN_SRC nix
+      system.stateVersion = "20.03";
+    };
+  }
+#+END_SRC

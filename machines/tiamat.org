@@ -1,0 +1,220 @@
+#+PROPERTY: header-args :tangle yes
+* tiamat
+** Preamble
+#+BEGIN_SRC nix
+  { tiamat = { config, pkgs, ... }:
+  let
+    baseconfig = {};
+    secrets = (import ../secrets.nix).tiamat;
+    unstable = import <nixos-unstable> { config = baseconfig; };
+  in
+  {
+    imports = [
+      <nixos-unstable/nixos/modules/services/misc/radarr.nix>
+      <nixos-unstable/nixos/modules/services/misc/sonarr.nix>
+      <nixos-unstable/nixos/modules/services/torrent/transmission.nix>
+    ];
+
+    disabledModules = [
+      "services/misc/radarr.nix"
+      "services/misc/sonarr.nix"
+      "services/torrent/transmission.nix"
+    ];
+
+    nixpkgs.config = baseconfig // {
+      packageOverrides = pkgs: {
+        radarr = unstable.pkgsi686Linux.radarr;
+        sonarr = unstable.pkgsi686Linux.sonarr;
+        transmission = unstable.pkgsi686Linux.transmission;
+      };
+    };
+#+END_SRC
+** Configuration
+*** Misc
+#+BEGIN_SRC nix
+  services.logind.lidSwitch = "ignore";
+#+END_SRC
+*** Networking
+#+BEGIN_SRC nix
+  networking.useDHCP = false;
+  networking.interfaces.enp0s25.useDHCP = true;
+#+END_SRC
+**** Firewall
+#+BEGIN_SRC nix
+  networking.firewall.enable = false;
+#+END_SRC
+**** Hostname
+#+BEGIN_SRC nix
+  networking.hostName = "tiamat";
+#+END_SRC
+*** Services
+**** dnsmasq
+#+BEGIN_SRC nix
+  services.dnsmasq = {
+    enable = true;
+    extraConfig = ''
+      address=/radarr/10.8.0.1
+      address=/sonarr/10.8.0.1
+      address=/tiamat/10.8.0.1
+      address=/transmission/10.8.0.1
+      address=/tt-rss/10.8.0.1
+    '';
+  };
+#+END_SRC
+**** NFS
+#+BEGIN_SRC nix
+  fileSystems."/export/movies" = {
+    device = "/var/lib/radarr/.config/Radarr/Downloads";
+    options = [ "bind" ];
+  };
+
+  fileSystems."/export/torrents" = {
+    device = "/var/lib/transmission/Downloads";
+    options = [ "bind" ];
+  };
+
+  fileSystems."/export/tv" = {
+    device = "/var/lib/sonarr/.config/NzbDrone/Downloads";
+    options = [ "bind" ];
+  };
+
+  services.nfs.server.enable = true;
+
+  services.nfs.server.exports = ''
+    /export          10.0.0.0/24(ro,fsid=0,nohide,insecure,no_subtree_check)
+    /export/movies   10.0.0.0/24(ro,fsid=4,nohide,insecure,no_subtree_check)
+    /export/torrents 10.0.0.0/24(ro,fsid=1,nohide,insecure,no_subtree_check)
+    /export/tv       10.0.0.0/24(ro,fsid=5,nohide,insecure,no_subtree_check)
+  '';
+#+END_SRC
+**** nginx
+#+BEGIN_SRC nix
+  services.nginx = {
+    enable = true;
+    virtualHosts."radarr" =  {
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:7878";
+      };
+    };
+    virtualHosts."sonarr" =  {
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:8989";
+      };
+    };
+    virtualHosts."transmission" =  {
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:9091";
+      };
+    };
+  };
+#+END_SRC
+**** OpenVPN
+#+BEGIN_SRC nix
+  networking.nat = {
+    enable = true;
+    externalInterface = "wls1";
+    internalInterfaces = [ "tun0" ];
+  };
+
+  services.openvpn.servers.server.config = ''
+    dev tun
+
+    server 10.8.0.0 255.255.255.0
+
+    ca /root/ovpn/ca.crt
+    cert /root/ovpn/tiamat.crt
+    key /root/ovpn/tiamat.key
+    dh /root/ovpn/dh.pem
+
+    push "dhcp-option DNS 10.8.0.1"
+  '';
+#+END_SRC
+**** PostgreSQL
+#+BEGIN_SRC nix
+  services.postgresql = {
+    enable = true;
+    initialScript = pkgs.writeText "pg-init.sql" ''
+      CREATE DATABASE tt_rss;
+      CREATE USER tt_rss WITH PASSWORD '${secrets.tt-rss.database-password}';
+      GRANT ALL PRIVILEGES ON DATABASE tt_rss TO tt_rss;
+    '';
+  };
+#+END_SRC
+**** Radarr
+#+BEGIN_SRC nix
+    services.radarr.enable = true;
+    users.extraUsers.radarr.extraGroups = [ "transmission" ];
+#+END_SRC
+**** Sonarr
+#+BEGIN_SRC nix
+    services.sonarr.enable = true;
+    users.extraUsers.sonarr.extraGroups = [ "transmission" ];
+#+END_SRC
+**** OpenSSH
+#+BEGIN_SRC nix
+  services.openssh = {
+    enable = true;
+    openFirewall = false;
+  };
+#+END_SRC
+**** Transmission
+#+BEGIN_SRC nix
+  services.transmission = {
+    enable = true;
+    downloadDirPermissions = "775";
+    settings = {
+      rpc-bind-address = "0.0.0.0";
+      rpc-host-whitelist-enabled = false;
+      rpc-whitelist-enabled = false;
+    };
+  };
+#+END_SRC
+**** TT-RSS
+#+BEGIN_SRC nix
+  nixpkgs.overlays = [(self: super: {
+    tt-rss = super.tt-rss.overrideAttrs (oldAttrs: {
+      src = [
+        oldAttrs.src
+        (super.fetchFromGitHub {
+          owner = "jangernert";
+          repo = "FeedReader";
+          rev = "4bde7137a9db043395e6623c190cb0d02dda1d2e";
+          sha256 = "185mwrd0h5gy18h7gv44gm00wbzz9h1m9lkfz071yqcswbxqrm82";
+          name = "FeedReader";
+        })
+      ];
+
+      sourceRoot = ".";
+
+      installPhase = ''
+        mkdir $out
+        cp -ra tt-rss/* $out/
+      '';
+
+      postUnpack = ''
+        cp -r FeedReader/data/tt-rss-feedreader-plugin/api_feedreader tt-rss/plugins.local
+      '';
+    });
+  })];
+
+  services.tt-rss = {
+    enable = true;
+    selfUrlPath = "http://tt-rss";
+    virtualHost = "tt-rss";
+    database = {
+      host = "localhost";
+      password = secrets.tt-rss.database-password;
+    };
+    plugins = [
+      "api_feedreader"
+      "auth_internal"
+      "note"
+    ];
+  };
+#+END_SRC
+** Epilogue
+#+BEGIN_SRC nix
+      system.stateVersion = "20.03";
+    };
+  }
+#+END_SRC

@@ -1,0 +1,13 @@
+.gitsecret/keys/random_seed
+!*.secret
+
+easyrsa/pki/.rnd
+easyrsa/pki/private/ca.key
+easyrsa/pki/private/hekate.key
+easyrsa/pki/private/tiamat.key
+
+machines/hekate.nix
+machines/tiamat.nix
+
+deployments.json
+secrets.nix
