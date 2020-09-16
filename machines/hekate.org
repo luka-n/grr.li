@@ -61,6 +61,7 @@
     gnome3.gnome-tweak-tool
     gnomeExtensions.caffeine
     gnomeExtensions.dash-to-dock
+    hexchat
     htop
     irssi
     mc

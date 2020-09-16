@@ -62,6 +62,7 @@
       address=/tiamat/10.8.0.1
       address=/transmission/10.8.0.1
       address=/tt-rss/10.8.0.1
+      address=/znc/10.8.0.1
     '';
   };
 #+END_SRC
@@ -124,6 +125,11 @@
     virtualHosts."transmission" =  {
       locations."/" = {
         proxyPass = "http://127.0.0.1:9091";
+      };
+    };
+    virtualHosts."znc" =  {
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:52211";
       };
     };
   };
@@ -230,6 +236,53 @@
       "auth_internal"
       "note"
     ];
+  };
+#+END_SRC
+**** ZNC
+#+BEGIN_SRC nix
+  services.znc = {
+    enable = true;
+    configFile = pkgs.writeText "znc.conf" ''
+      Version = 1.6.5
+
+      <Listener irc>
+        AllowIRC = true
+        AllowWeb = false
+        IPv4     = true
+        IPv6     = false
+        Port     = 6697
+        SSL      = true
+      </Listener>
+
+      <Listener web>
+        AllowIRC = false
+        AllowWeb = true
+        IPv4     = true
+        IPv6     = false
+        Port     = 52211
+        SSL      = false
+      </Listener>
+
+      LoadModule = webadmin
+
+      <User me>
+        Admin               = true
+        AltNick             = me_
+        AutoClearChanBuffer = false
+        Ident               = me
+        Nick                = me
+        RealName            = me
+
+        LoadModule = chansaver
+        LoadModule = controlpanel
+
+        <Pass password>
+          Hash   = ${secrets.znc.user-pass-hash}
+          Method = ${secrets.znc.user-pass-method}
+          Salt   = ${secrets.znc.user-pass-salt}
+        </Pass>
+      </User>
+    '';
   };
 #+END_SRC
 ** Epilogue
