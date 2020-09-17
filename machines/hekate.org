@@ -47,6 +47,7 @@
 #+BEGIN_SRC nix
   home.packages = with pkgs; [
     adapta-gtk-theme
+    apg
     bitwarden
     colordiff
     discord
