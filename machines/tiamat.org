@@ -57,6 +57,7 @@
     enable = true;
     extraConfig = ''
       address=/lidarr/10.8.0.1
+      address=/nextcloud/10.8.0.1
       address=/radarr/10.8.0.1
       address=/sonarr/10.8.0.1
       address=/tiamat/10.8.0.1
@@ -70,6 +71,19 @@
 #+BEGIN_SRC nix
     services.lidarr.enable = true;
     users.extraUsers.lidarr.extraGroups = [ "transmission" ];
+#+END_SRC
+**** Nextcloud
+#+BEGIN_SRC nix
+  services.nextcloud = {
+    enable = true;
+    hostName = "nextcloud";
+    nginx.enable = true;
+    config = {
+      adminpass = secrets.nextcloud.admin-password;
+      dbtype = "pgsql";
+      dbpass = secrets.nextcloud.database-password;
+    };
+  };
 #+END_SRC
 **** NFS
 #+BEGIN_SRC nix
@@ -160,6 +174,10 @@
   services.postgresql = {
     enable = true;
     initialScript = pkgs.writeText "pg-init.sql" ''
+      CREATE DATABASE nextcloud;
+      CREATE USER nextcloud WITH PASSWORD '${secrets.nextcloud.database-password}';
+      GRANT ALL PRIVILEGES ON DATABASE nextcloud TO nextcloud;
+
       CREATE DATABASE tt_rss;
       CREATE USER tt_rss WITH PASSWORD '${secrets.tt-rss.database-password}';
       GRANT ALL PRIVILEGES ON DATABASE tt_rss TO tt_rss;
