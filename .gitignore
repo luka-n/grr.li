@@ -3,6 +3,7 @@
 
 easyrsa/pki/.rnd
 easyrsa/pki/private/ca.key
+easyrsa/pki/private/droid.key
 easyrsa/pki/private/hekate.key
 easyrsa/pki/private/tiamat.key
 
