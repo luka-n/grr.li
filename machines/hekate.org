@@ -48,6 +48,7 @@
   home.packages = with pkgs; [
     adapta-gtk-theme
     bitwarden
+    colordiff
     discord
     dnsutils
     easyrsa
@@ -77,6 +78,7 @@
     steam
     tdesktop
     tilix
+    traceroute
     transmission-remote-gtk
     unzip
     vim
