@@ -60,6 +60,7 @@
     fzf
     git
     git-secret
+    gnome3.evolution
     gnome3.geary
     gnome3.gnome-tweak-tool
     gnomeExtensions.caffeine
