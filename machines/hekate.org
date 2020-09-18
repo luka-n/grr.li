@@ -65,6 +65,7 @@
     gnome3.gnome-tweak-tool
     gnomeExtensions.caffeine
     gnomeExtensions.dash-to-dock
+    gnomeExtensions.gsconnect
     hexchat
     htop
     irssi
@@ -117,6 +118,14 @@
 #+BEGIN_SRC nix
   networking.firewall.allowedTCPPorts = [
     9117                          # jackett
+  ];
+
+  networking.firewall.allowedTCPPortRanges = [
+    { from = 1714; to = 1764; }   # gsconnect
+  ];
+
+  networking.firewall.allowedUDPPortRanges = [
+    { from = 1714; to = 1764; }   # gsconnect
   ];
 #+END_SRC
 **** Hostname
