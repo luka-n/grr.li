@@ -231,6 +231,9 @@
     downloadDirPermissions = "775";
 
     settings = {
+      alt-speed-enabled = true;
+      alt-speed-down = 750;
+      alt-speed-up = 50;
       rpc-bind-address = "0.0.0.0";
       rpc-host-whitelist-enabled = false;
       rpc-whitelist-enabled = false;
