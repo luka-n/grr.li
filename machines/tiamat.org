@@ -120,11 +120,11 @@
     enable = true;
 
     exports = ''
-      /export          *(ro,fsid=0)
-      /export/movies   *(ro,fsid=4)
-      /export/music    *(ro,fsid=6)
-      /export/torrents *(ro,fsid=1)
-      /export/tv       *(ro,fsid=5)
+      /export          *(ro,fsid=0,insecure,nohide)
+      /export/movies   *(ro,fsid=4,insecure,nohide)
+      /export/music    *(ro,fsid=6,insecure,nohide)
+      /export/torrents *(ro,fsid=1,insecure,nohide)
+      /export/tv       *(ro,fsid=5,insecure,nohide)
     '';
   };
 #+END_SRC
