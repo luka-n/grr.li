@@ -60,6 +60,12 @@
 #+BEGIN_SRC nix
   networking.hostName = "tiamat";
 #+END_SRC
+*** Packages
+#+BEGIN_SRC nix
+  environment.systemPackages = with pkgs; [
+    sqlite
+  ];
+#+END_SRC
 *** Services
 **** dnsmasq
 #+BEGIN_SRC nix
