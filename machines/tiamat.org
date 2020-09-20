@@ -44,7 +44,17 @@
 #+END_SRC
 **** Firewall
 #+BEGIN_SRC nix
-  networking.firewall.enable = false;
+  networking.firewall = {
+    enable = true;
+    extraCommands = ''
+      iptables -A nixos-fw -s 10.0.0.0/8 -j nixos-fw-accept
+      ip6tables -A nixos-fw -s fd00::/16 -j nixos-fw-accept
+    '';
+    allowedUDPPorts = [
+      1194                        # openvpn
+    ];
+    trustedInterfaces = [ "tun0" ];
+  };
 #+END_SRC
 **** Hostname
 #+BEGIN_SRC nix
@@ -60,7 +70,6 @@
       address=/nextcloud/10.8.0.1
       address=/radarr/10.8.0.1
       address=/sonarr/10.8.0.1
-      address=/tiamat/10.8.0.1
       address=/transmission/10.8.0.1
       address=/tt-rss/10.8.0.1
       address=/znc/10.8.0.1
@@ -69,8 +78,8 @@
 #+END_SRC
 **** Lidarr
 #+BEGIN_SRC nix
-    services.lidarr.enable = true;
-    users.extraUsers.lidarr.extraGroups = [ "transmission" ];
+  services.lidarr.enable = true;
+  users.extraUsers.lidarr.extraGroups = [ "transmission" ];
 #+END_SRC
 **** Nextcloud
 #+BEGIN_SRC nix
@@ -107,45 +116,64 @@
     options = [ "bind" ];
   };
 
-  services.nfs.server.enable = true;
+  services.nfs.server = {
+    enable = true;
 
-  services.nfs.server.exports = ''
-    /export          10.0.0.0/24(ro,fsid=0,nohide,insecure,no_subtree_check)
-    /export/movies   10.0.0.0/24(ro,fsid=4,nohide,insecure,no_subtree_check)
-    /export/music    10.0.0.0/24(ro,fsid=6,nohide,insecure,no_subtree_check)
-    /export/torrents 10.0.0.0/24(ro,fsid=1,nohide,insecure,no_subtree_check)
-    /export/tv       10.0.0.0/24(ro,fsid=5,nohide,insecure,no_subtree_check)
-  '';
+    exports = ''
+      /export          *(ro,fsid=0)
+      /export/movies   *(ro,fsid=4)
+      /export/music    *(ro,fsid=6)
+      /export/torrents *(ro,fsid=1)
+      /export/tv       *(ro,fsid=5)
+    '';
+  };
 #+END_SRC
 **** nginx
 #+BEGIN_SRC nix
   services.nginx = {
     enable = true;
+
+    recommendedProxySettings = true;
+
     virtualHosts."lidarr" =  {
       locations."/" = {
         proxyPass = "http://127.0.0.1:8686";
+        proxyWebsockets = true;
       };
     };
+
     virtualHosts."radarr" =  {
       locations."/" = {
         proxyPass = "http://127.0.0.1:7878";
+        proxyWebsockets = true;
       };
     };
+
     virtualHosts."sonarr" =  {
       locations."/" = {
         proxyPass = "http://127.0.0.1:8989";
+        proxyWebsockets = true;
       };
     };
+
     virtualHosts."transmission" =  {
       locations."/" = {
         proxyPass = "http://127.0.0.1:9091";
       };
     };
+
     virtualHosts."znc" =  {
       locations."/" = {
         proxyPass = "http://127.0.0.1:52211";
       };
     };
+  };
+#+END_SRC
+**** OpenSSH
+#+BEGIN_SRC nix
+  services.openssh = {
+    enable = true;
+    openFirewall = false;
   };
 #+END_SRC
 **** OpenVPN
@@ -173,6 +201,7 @@
 #+BEGIN_SRC nix
   services.postgresql = {
     enable = true;
+
     initialScript = pkgs.writeText "pg-init.sql" ''
       CREATE DATABASE nextcloud;
       CREATE USER nextcloud WITH PASSWORD '${secrets.nextcloud.database-password}';
@@ -186,26 +215,21 @@
 #+END_SRC
 **** Radarr
 #+BEGIN_SRC nix
-    services.radarr.enable = true;
-    users.extraUsers.radarr.extraGroups = [ "transmission" ];
+  services.radarr.enable = true;
+  users.extraUsers.radarr.extraGroups = [ "transmission" ];
 #+END_SRC
 **** Sonarr
 #+BEGIN_SRC nix
-    services.sonarr.enable = true;
-    users.extraUsers.sonarr.extraGroups = [ "transmission" ];
-#+END_SRC
-**** OpenSSH
-#+BEGIN_SRC nix
-  services.openssh = {
-    enable = true;
-    openFirewall = false;
-  };
+  services.sonarr.enable = true;
+  users.extraUsers.sonarr.extraGroups = [ "transmission" ];
 #+END_SRC
 **** Transmission
 #+BEGIN_SRC nix
   services.transmission = {
     enable = true;
+
     downloadDirPermissions = "775";
+
     settings = {
       rpc-bind-address = "0.0.0.0";
       rpc-host-whitelist-enabled = false;
