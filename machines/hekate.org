@@ -116,17 +116,19 @@
 #+END_SRC
 **** Firewall
 #+BEGIN_SRC nix
-  networking.firewall.allowedTCPPorts = [
-    9117                          # jackett
-  ];
+  networking.firewall = {
+    allowedTCPPorts = [
+      9117                        # jackett
+    ];
 
-  networking.firewall.allowedTCPPortRanges = [
-    { from = 1714; to = 1764; }   # gsconnect
-  ];
+    allowedTCPPortRanges = [
+      { from = 1714; to = 1764; } # gsconnect
+    ];
 
-  networking.firewall.allowedUDPPortRanges = [
-    { from = 1714; to = 1764; }   # gsconnect
-  ];
+    allowedUDPPortRanges = [
+      { from = 1714; to = 1764; } # gsconnect
+    ];
+  };
 #+END_SRC
 **** Hostname
 #+BEGIN_SRC nix
