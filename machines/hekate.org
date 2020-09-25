@@ -11,6 +11,7 @@
     imports = [
       <nixos-unstable/nixos/modules/services/misc/jackett.nix>
       ../home-manager/nixos
+      ../modules/common.nix
     ];
 
     disabledModules = [
@@ -43,6 +44,97 @@
 #+BEGIN_SRC nix
   home-manager.users.me = {
 #+END_SRC
+**** dconf
+#+BEGIN_SRC nix
+  dconf.settings = {
+    "org/gnome/desktop/input-sources" = {
+      xkb-options = [ "caps:ctrl_modifier" ];
+    };
+
+    "org/gnome/desktop/interface" = {
+      enable-animations = false;
+      gtk-key-theme = "Emacs";
+      gtk-theme = "Adapta-Eta";
+      icon-theme = "Paper";
+      monospace-font-name = "Monoid Light Semi-Condensed 9";
+    };
+
+    "org/gnome/desktop/notifications" = {
+      show-in-lock-screen = false;
+    };
+
+    "org/gnome/desktop/search-providers" = {
+      disable-external = true;
+    };
+
+    "org/gnome/desktop/sound" = {
+      allow-volume-above-100-percent = true;
+    };
+
+    "org/gnome/desktop/wm/preferences" = {
+      resize-with-right-button = true;
+    };
+
+    "org/gnome/shell" = {
+      enabled-extensions = [
+        "alt-tab-raise-first-window@system76.com"
+        "caffeine@patapon.info"
+        "dash-to-dock@micxgx.gmail.com"
+        "middleclickclose@paolo.tranquilli.gmail.com"
+        "nasa_apod@elinvention.ovh"
+        "no-title-bar@jonaspoehler.de"
+        "openweather-extension@jenslody.de"
+        "refresh-wifi@kgshank.net"
+        "tweaks-system-menu@extensions.gnome-shell.fifi.org"
+        "user-theme@gnome-shell-extensions.gcampax.github.com"
+        "windowoverlay-icons@sustmidown.centrum.cz"
+      ];
+    };
+
+    "org/gnome/shell/extensions/dash-to-dock" = {
+      background-opacity = 0.6;
+      dash-max-icon-size = 32;
+      dock-fixed = true;
+      extend-height = true;
+      running-indicator-dominant-color = true;
+      running-indicator-style = "SQUARES";
+      scroll-action = "switch-workspace";
+      show-mounts = false;
+      show-trash = false;
+      transparency-mode = "FIXED";
+    };
+
+    "org/gnome/shell/extensions/nasa-apod" = {
+      hide = true;
+    };
+
+    "org/gnome/shell/extensions/no-title-bar" = {
+      button-position = "hidden";
+    };
+
+    "org/gnome/shell/extensions/openweather" = {
+      city = "46.0102989,15.3016229>Sevnica, Slovenija >-1";
+      days-forecast = 3;
+      pressure-unit = "hPa";
+      unit = "celsius";
+      wind-speed-unit = "kph";
+    };
+
+    "org/gnome/shell/extensions/user-theme" = {
+      name = "Adapta-Nokto-Eta";
+    };
+
+    "org/gnome/shell/extensions/windowoverlay-icons" = {
+      icon-opacity-blur = 255;
+      icon-size = 50;
+      icon-size-relative = true;
+    };
+
+    "org/gnome/system/locale" = {
+      region = "sl_SI.UTF-8";
+    };
+  };
+#+END_SRC
 **** Packages
 #+BEGIN_SRC nix
   home.packages = with pkgs; [
@@ -63,13 +155,22 @@
     gnome3.evolution
     gnome3.geary
     gnome3.gnome-tweak-tool
+    gnomeExtensions.alt-tab-raise-first-window
     gnomeExtensions.caffeine
     gnomeExtensions.dash-to-dock
     gnomeExtensions.gsconnect
+    gnomeExtensions.middleclickclose
+    gnomeExtensions.nasa-apod
+    gnomeExtensions.no-title-bar
+    gnomeExtensions.openweather
+    gnomeExtensions.refresh-wifi
+    gnomeExtensions.tweaks-system-menu
+    gnomeExtensions.windowoverlay-icons
     hexchat
     htop
     irssi
     mc
+    monoid
     ncdu
     networkmanagerapplet
     nfs-utils
