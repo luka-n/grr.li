@@ -1,4 +1,15 @@
 [submodule "home-manager"]
 	path = home-manager
 	url = https://github.com/nix-community/home-manager
-	branch = release-20.03
+	branch = release-20.09
+[submodule "nixpkgs"]
+	path = nixpkgs
+	url = https://github.com/NixOS/nixpkgs
+	branch = nixos-20.09
+[submodule "nixpkgs-unstable"]
+	path = nixpkgs-unstable
+	url = https://github.com/NixOS/nixpkgs
+	branch = nixos-unstable
+[submodule "nur"]
+	path = nur
+	url = https://github.com/nix-community/NUR

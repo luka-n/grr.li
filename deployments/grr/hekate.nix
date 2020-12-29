@@ -36,12 +36,12 @@
   };
 
   fileSystems."/" = {
-    device = "/dev/disk/by-uuid/506a3736-1530-4e32-b4a6-4c8f6a520f96";
+    device = "/dev/disk/by-uuid/3b6cc219-0c45-4972-856e-13e1e77a4276";
     fsType = "ext4";
   };
 
   fileSystems."/boot" = {
-    device = "/dev/disk/by-uuid/ef5df394-7c4b-435b-a7c6-e1754bd06b78";
+    device = "/dev/disk/by-uuid/21c87d37-5aec-4774-bcf2-b75dff879385";
     fsType = "ext4";
   };
 
@@ -50,6 +50,6 @@
   powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";
 
   swapDevices = [
-    { device = "/dev/disk/by-uuid/44150c6c-9c69-48b7-aa9c-0fcd31af9930"; }
+    { device = "/dev/disk/by-uuid/c037a366-9116-43fd-af28-21b3d64e6e88"; }
   ];
 }

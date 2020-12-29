@@ -5,6 +5,7 @@
   { hekate = { config, pkgs, ... }:
   let
     baseconfig = { allowUnfree = true; };
+    nur = import <nur> { inherit pkgs; };
     unstable = import <nixos-unstable> { config = baseconfig; };
   in
   {
@@ -44,7 +45,129 @@
 #+BEGIN_SRC nix
   home-manager.users.me = {
 #+END_SRC
-**** dconf
+**** Emacs
+#+BEGIN_SRC nix
+  programs.emacs = {
+    enable = true;
+    extraPackages = epkgs: (with epkgs; [
+      ace-jump-mode
+      anzu
+      bbdb
+      buffer-move
+      bundler
+      c-eldoc
+      coffee-mode
+      company
+      company-nixos-options
+      default-text-scale
+      diminish
+      dired-k
+      dired-sidebar
+      dired-single
+      dired-subtree
+      dockerfile-mode
+      doom-themes
+      dtrt-indent
+      dumb-jump
+      eldoc
+      eldoc
+      elisp-slime-nav
+      elpy
+      erc-hl-nicks
+      esup
+      expand-region
+      feature-mode
+      flycheck
+      git-gutter-fringe
+      git-link
+      git-timemachine
+      haml-mode
+      helm
+      helm-company
+      helm-descbinds
+      helm-projectile
+      highlight-parentheses
+      js2-mode
+      json-mode
+      lua-mode
+      magit
+      multiple-cursors
+      nix-mode
+      org-bullets
+      paredit
+      projectile
+      projectile-rails
+      racer
+      rjsx-mode
+      robe
+      rspec-mode
+      rubocop
+      rust-mode
+      scratch
+      slim-mode
+      slime
+      slime-company
+      spaceline
+      toc-org
+      undo-tree
+      volatile-highlights
+      web-mode
+      which-key
+      yaml-mode
+      yasnippet
+      znc
+    ]);
+  };
+#+END_SRC
+**** Firefox
+#+BEGIN_SRC nix
+  programs.firefox = {
+    enable = true;
+
+    extensions = with nur.repos.rycee.firefox-addons; [
+      auto-tab-discard
+      bitwarden
+      gesturefy
+      octotree
+      old-reddit-redirect
+      reddit-enhancement-suite
+      tree-style-tab
+      ublock-origin
+      vimium
+    ];
+
+    profiles = {
+      nixfox = {
+        userChrome = builtins.readFile ../files/userChrome.css;
+
+        settings = {
+          "app.shield.optoutstudies.enabled" = false;
+          "browser.ctrlTab.recentlyUsedOrder" = false;
+          "browser.discovery.enabled" = false;
+          "browser.newtabpage.enabled" = false;
+          "browser.startup.homepage" = "about:blank";
+          "browser.startup.page" = 3;
+          "browser.tabs.closeWindowWithLastTab" = false;
+          "browser.tabs.drawInTitlebar" = false;
+          "browser.uidensity" = 1;
+          "browser.urlbar.matchBuckets" = "general:5,suggestion:Infinity";
+          "browser.urlbar.placeholderName" = "DuckDuckGo";
+          "browser.urlbar.suggest.topsites" = false;
+          "browser.urlbar.tipShownCount.tabToSearch" = 5;
+          "extensions.pocket.enabled" = false;
+          "general.smoothScroll" = false;
+          "general.warnOnAboutConfig" = false;
+          "signon.rememberSignons" = false;
+          "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
+
+          # this is just to fix gesturefy
+          "ui.context_menus.after_mouseup" = true;
+        };
+      };
+    };
+  };
+#+END_SRC
+**** GNOME
 #+BEGIN_SRC nix
   dconf.settings = {
     "org/gnome/desktop/input-sources" = {
@@ -145,10 +268,8 @@
     discord
     dnsutils
     easyrsa
-    emacs
     feedreader
     file
-    firefox
     fzf
     git
     git-secret
@@ -183,6 +304,7 @@
     tdesktop
     tilix
     traceroute
+    transmission-gtk
     transmission-remote-gtk
     unzip
     vim
@@ -209,6 +331,10 @@
 **** Epilogue
 #+BEGIN_SRC nix
   };
+#+END_SRC
+*** Misc
+#+BEGIN_SRC nix
+  time.timeZone = "Europe/Ljubljana";
 #+END_SRC
 *** Networking
 #+BEGIN_SRC nix
@@ -258,7 +384,7 @@
 #+END_SRC
 ** Epilogue
 #+BEGIN_SRC nix
-      system.stateVersion = "20.03";
+      system.stateVersion = "20.09";
     };
   }
 #+END_SRC
