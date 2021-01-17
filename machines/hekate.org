@@ -110,6 +110,7 @@
       spaceline
       toc-org
       undo-tree
+      use-package
       volatile-highlights
       web-mode
       which-key
