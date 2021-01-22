@@ -168,6 +168,85 @@
     };
   };
 #+END_SRC
+**** fish
+#+BEGIN_SRC nix
+  programs.fish = {
+    enable = true;
+
+    shellInit = ''
+      set fish_greeting
+
+      set -x LESS "-Ri"
+      set -x MANWIDTH 80
+
+      source ${pkgs.grc}/etc/grc.fish
+
+      # not done automatically as it should be
+      __enhancd_install
+      _enhancd_alias
+    '';
+
+    shellAbbrs = {
+      g = "git";
+    };
+
+    shellAliases = {
+      diff = "colordiff";
+      make = "colormake";
+
+      gcc = "gcc -fdiagnostics-color=auto";
+
+      grep = "grep --color=auto -P";
+      egrep = "egrep --color=auto";
+      fgrep = "fgrep --color=auto";
+
+      ls = "ls -1F --color=auto";
+      lc = "ls -CF --color=auto";
+      l = "ls";
+      la = "ls -A";
+      ll = "ls -l";
+      lt =  "ls -t";
+      ltr = "ls -tr";
+    };
+
+    plugins = [
+      {
+        name = "autopair.fish";
+        src = pkgs.fetchFromGitHub {
+          owner = "jorgebucaran";
+          repo = "autopair.fish";
+          rev = "1222311994a0730e53d8e922a759eeda815fcb62";
+          sha256 = "0lxfy17r087q1lhaz5rivnklb74ky448llniagkz8fy393d8k9cp";
+        };
+      }
+      {
+        name = "colored_man_pages.fish";
+        src = pkgs.fetchFromGitHub {
+          owner = "PatrickF1";
+          repo = "colored_man_pages.fish";
+          rev = "b0e89f8d028388643dec59c6bc349b1e611da9bf";
+          sha256 = "0z53qdwz0gqfggxyny656xlsdpnirrw5q13b2b9apy34mi6rvdnq";
+        };
+      }
+      {
+        name = "enhancd";
+        src = pkgs.fetchFromGitHub {
+          owner = "b4b4r07";
+          repo = "enhancd";
+          rev = "5bd943691cfb096e39f5f98fe79550bb638f4cc6";
+          sha256 = "1iijy1hd80s11zc3mw5q6b0hrikijd84qznf8sivv432wwxnm5dv";
+        };
+      }
+    ];
+  };
+#+END_SRC
+***** Starship
+#+BEGIN_SRC nix
+  programs.starship = {
+    enable = true;
+    enableFishIntegration = true;
+  };
+#+END_SRC
 **** GNOME
 #+BEGIN_SRC nix
   dconf.settings = {
@@ -264,13 +343,17 @@
   home.packages = with pkgs; [
     adapta-gtk-theme
     apg
+    bat
     bitwarden
     colordiff
+    colormake
     discord
     dnsutils
     easyrsa
+    fd
     feedreader
     file
+    fzf
     fzf
     git
     git-secret
@@ -288,6 +371,7 @@
     gnomeExtensions.refresh-wifi
     gnomeExtensions.tweaks-system-menu
     gnomeExtensions.windowoverlay-icons
+    grc
     hexchat
     htop
     irssi
@@ -381,6 +465,7 @@
   users.users.me = {
     isNormalUser = true;
     extraGroups = [ "wheel" ];
+    shell = pkgs.fish;
   };
 #+END_SRC
 ** Epilogue
