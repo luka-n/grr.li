@@ -11,18 +11,12 @@
   {
     imports = [
       <nixos-unstable/nixos/modules/services/misc/lidarr.nix>
-      <nixos-unstable/nixos/modules/services/misc/radarr.nix>
-      <nixos-unstable/nixos/modules/services/misc/sonarr.nix>
-      <nixos-unstable/nixos/modules/services/torrent/transmission.nix>
       <nixos-unstable/nixos/modules/services/web-apps/grocy.nix>
       ../modules/common.nix
     ];
 
     disabledModules = [
       "services/misc/lidarr.nix"
-      "services/misc/radarr.nix"
-      "services/misc/sonarr.nix"
-      "services/torrent/transmission.nix"
       "services/web-apps/grocy.nix"
     ];
 
@@ -30,9 +24,6 @@
       packageOverrides = pkgs: {
         grocy = unstable.pkgsi686Linux.grocy;
         lidarr = unstable.pkgsi686Linux.lidarr;
-        radarr = unstable.pkgsi686Linux.radarr;
-        sonarr = unstable.pkgsi686Linux.sonarr;
-        transmission = unstable.pkgsi686Linux.transmission;
       };
     };
 #+END_SRC
@@ -106,7 +97,7 @@
   services.nextcloud = {
     enable = true;
     hostName = "nextcloud";
-    package = pkgs.nextcloud20;
+    package = pkgs.nextcloud21;
 
     config = {
       adminpass = secrets.nextcloud.admin-password;
